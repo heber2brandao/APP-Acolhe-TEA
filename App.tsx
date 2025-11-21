@@ -6,7 +6,8 @@ import {
   Clock, Trash2, Check, X, BookMarked, GraduationCap,
   MessageCircleHeart, Utensils, Lightbulb, Footprints, 
   Sparkles, Palette, Puzzle, Smile, User, Mail, Phone,
-  ChevronRight, FileText, Calendar as CalendarIcon, Lock, LogOut, Eye, EyeOff
+  ChevronRight, FileText, Calendar as CalendarIcon, Lock, LogOut, Eye, EyeOff,
+  Download, Share, MoreVertical
 } from 'lucide-react';
 import { DISCLAIMER_TEXT, LIBRARY_CONTENT } from './constants';
 import { AppState, TeaLevel, ChildProfile, Activity, CompletedActivity, NotificationSettings, AppNotification, ActivityCategory, LibraryModule, LibraryArticle } from './types';
@@ -410,6 +411,59 @@ const CalendarView = ({ history, onBack }: { history: CompletedActivity[], onBac
   );
 };
 
+// --- COMPONENT: INSTALL GUIDE ---
+
+const InstallGuide = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
+      <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-slide-in">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-slate-800">Instalar Aplicativo</h3>
+          <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-full">
+            <X className="w-6 h-6 text-slate-400" />
+          </button>
+        </div>
+        
+        <p className="text-slate-500 text-sm mb-6">
+          Adicione o AcolheTEA à sua tela inicial para usar em tela cheia, igual a um aplicativo nativo.
+        </p>
+
+        <div className="space-y-6">
+          {/* iPhone Instructions */}
+          <div className="flex gap-4 items-start">
+            <div className="bg-stone-100 p-3 rounded-xl">
+               <Share className="w-6 h-6 text-blue-500" />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-700 text-sm">No iPhone (Safari)</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                1. Toque no ícone de <strong>Compartilhar</strong> (quadrado com seta) na barra inferior.<br/>
+                2. Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.
+              </p>
+            </div>
+          </div>
+
+          {/* Android Instructions */}
+          <div className="flex gap-4 items-start">
+            <div className="bg-stone-100 p-3 rounded-xl">
+               <MoreVertical className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-700 text-sm">No Android (Chrome)</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                1. Toque nos <strong>três pontinhos</strong> no canto superior direito.<br/>
+                2. Selecione <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar aplicativo"</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <Button fullWidth onClick={onClose} className="mt-8">Entendi</Button>
+      </div>
+    </div>
+  );
+};
+
 // --- SUB-COMPONENTS ---
 
 const Onboarding = ({ onComplete }: { onComplete: (name: string, phone: string, child: ChildProfile) => void }) => {
@@ -666,12 +720,14 @@ const SettingsView = ({
   settings, 
   onUpdateSettings, 
   childName,
-  onLogout
+  onLogout,
+  onOpenInstall
 }: { 
   settings: NotificationSettings, 
   onUpdateSettings: (s: NotificationSettings) => void,
   childName: string,
-  onLogout: () => void
+  onLogout: () => void,
+  onOpenInstall: () => void
 }) => {
   
   const requestPermission = () => {
@@ -699,6 +755,18 @@ const SettingsView = ({
         <Settings className="w-6 h-6 text-green-600" />
         Configurações
       </h1>
+
+      <Card className="mb-6 bg-gradient-to-r from-green-600 to-teal-600 border-none text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-lg">Instalar Aplicativo</h3>
+            <p className="text-xs text-green-100 opacity-90 mt-1">Tenha o AcolheTEA na tela inicial</p>
+          </div>
+          <Button onClick={onOpenInstall} className="bg-white text-green-700 hover:bg-green-50 px-4 py-2 h-auto text-sm shadow-none">
+             <Download className="w-4 h-4 mr-2" /> Instalar
+          </Button>
+        </div>
+      </Card>
 
       <Card className="mb-6">
         <div className="flex items-center justify-between mb-6">
@@ -772,7 +840,7 @@ const SettingsView = ({
       </Button>
       
       <div className="text-center mt-8 text-xs text-slate-400">
-        <p>AcolheTEA v1.1.0</p>
+        <p>AcolheTEA v1.2.0</p>
       </div>
     </div>
   );
@@ -1199,6 +1267,7 @@ export default function App() {
 
   const [view, setView] = useState<'onboarding' | 'dashboard' | 'progress' | 'modules' | 'detail' | 'settings' | 'calendar'>('dashboard');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
 
   // --- AUTH EFFECTS ---
@@ -1416,6 +1485,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-stone-50 text-slate-800 font-sans max-w-lg mx-auto shadow-2xl overflow-hidden relative">
       
+      {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
+
       {showNotifications && (
         <NotificationCenter 
           notifications={currentUser.notifications}
@@ -1456,6 +1527,7 @@ export default function App() {
             childName={currentUser.child.name}
             onUpdateSettings={(newSettings) => setCurrentUser(prev => prev ? ({...prev, settings: newSettings}) : null)} 
             onLogout={handleLogout}
+            onOpenInstall={() => setShowInstallGuide(true)}
           />
         )}
       </div>
