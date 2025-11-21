@@ -6,7 +6,7 @@ import {
   Clock, Trash2, Check, X, BookMarked, GraduationCap,
   MessageCircleHeart, Utensils, Lightbulb, Footprints, 
   Sparkles, Palette, Puzzle, Smile, User, Mail, Phone,
-  ChevronRight, FileText, HeartHandshake
+  ChevronRight, FileText
 } from 'lucide-react';
 import { DISCLAIMER_TEXT, LIBRARY_CONTENT } from './constants';
 import { AppState, TeaLevel, ChildProfile, Activity, CompletedActivity, NotificationSettings, AppNotification, ActivityCategory, LibraryModule, LibraryArticle } from './types';
@@ -23,7 +23,9 @@ const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => {
   if (!error) {
     return (
       <img 
-        src="/logo.png" 
+        // IMPORTANTE: src="logo.png" sem a barra inicial permite que o app
+        // funcione dentro de subpastas em outros servidores.
+        src="logo.png" 
         alt="AcolheTEA" 
         className={`object-contain ${className} transition-opacity duration-300`}
         onError={() => setError(true)} 
@@ -31,11 +33,20 @@ const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => {
     );
   }
 
-  // Fallback Premium: Ícone representativo limpo se a imagem falhar
-  // Evita desenhos complexos que podem parecer amadores
+  // Fallback Premium e Seguro:
+  // Usa ícones nativos (Heart e Sparkles) que já estão carregados no app,
+  // garantindo que não haja erro de importação (tela branca).
   return (
-    <div className={`flex items-center justify-center bg-green-50 rounded-full p-6 shadow-sm ${className}`}>
-      <HeartHandshake className="w-full h-full text-green-600 opacity-90" strokeWidth={1.5} />
+    <div className={`flex items-center justify-center bg-white border border-stone-100 rounded-[2rem] p-6 shadow-sm ${className}`}>
+      <div className="relative w-full h-full flex items-center justify-center">
+         {/* Coração central representando o acolhimento */}
+         <Heart className="w-full h-full text-green-600" fill="currentColor" fillOpacity={0.1} strokeWidth={1.5} />
+         
+         {/* Detalhe de brilho representando o desenvolvimento */}
+         <div className="absolute -top-1 -right-1 bg-amber-400 rounded-full p-1.5 border-4 border-white shadow-sm">
+           <Sparkles className="w-4 h-4 text-white" strokeWidth={3} />
+         </div>
+      </div>
     </div>
   );
 };
