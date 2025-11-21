@@ -6,7 +6,7 @@ import {
   Clock, Trash2, Check, X, BookMarked, GraduationCap,
   MessageCircleHeart, Utensils, Lightbulb, Footprints, 
   Sparkles, Palette, Puzzle, Smile, User, Mail, Phone,
-  ChevronRight, FileText
+  ChevronRight, FileText, HeartHandshake
 } from 'lucide-react';
 import { DISCLAIMER_TEXT, LIBRARY_CONTENT } from './constants';
 import { AppState, TeaLevel, ChildProfile, Activity, CompletedActivity, NotificationSettings, AppNotification, ActivityCategory, LibraryModule, LibraryArticle } from './types';
@@ -17,28 +17,30 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 
 // --- CUSTOM LOGO IMAGE ---
 
-const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="6">
-    {/* Lado Esquerdo do Coração (Vermelho) */}
-    <path d="M50 25 C 30 5, 10 20, 10 45 C 10 65, 25 80, 40 90" stroke="#ef4444" />
-    
-    {/* Conexão Inferior (Amarelo) - O detalhe da pontinha */}
-    <path d="M40 90 L 50 96" stroke="#f59e0b" />
-    
-    {/* Lado Direito do Coração (Azul) */}
-    <path d="M50 96 C 75 85, 90 65, 90 45 C 90 20, 70 5, 50 25" stroke="#3b82f6" />
-    
-    {/* Folha (Verde) - Estilo Contorno */}
-    {/* Curva Superior da Folha */}
-    <path d="M45 75 Q 38 40 72 32" stroke="#22c55e" strokeWidth="5" />
-    {/* Curva Inferior da Folha */}
-    <path d="M45 75 Q 75 78 72 32" stroke="#22c55e" strokeWidth="5" />
-    {/* Nervura Central da Folha */}
-    <path d="M45 75 Q 58 60 68 42" stroke="#22c55e" strokeWidth="5" />
-  </svg>
-);
+const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => {
+  const [error, setError] = useState(false);
 
-const BrandName = ({ className = "text-3xl" }: { className?: string }) => (
+  if (!error) {
+    return (
+      <img 
+        src="/logo.png" 
+        alt="AcolheTEA" 
+        className={`object-contain ${className} transition-opacity duration-300`}
+        onError={() => setError(true)} 
+      />
+    );
+  }
+
+  // Fallback Premium: Ícone representativo limpo se a imagem falhar
+  // Evita desenhos complexos que podem parecer amadores
+  return (
+    <div className={`flex items-center justify-center bg-green-50 rounded-full p-6 shadow-sm ${className}`}>
+      <HeartHandshake className="w-full h-full text-green-600 opacity-90" strokeWidth={1.5} />
+    </div>
+  );
+};
+
+const BrandName = ({ className = "text-4xl" }: { className?: string }) => (
   <h1 className={`font-bold tracking-tight ${className}`}>
     <span className="text-red-500">A</span>
     <span className="text-amber-400">c</span>
@@ -206,27 +208,27 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8 flex flex-col items-center">
-           <BrandLogo className="w-32 h-32 mb-4 drop-shadow-sm" />
+        <div className="text-center mb-10 flex flex-col items-center">
+           <BrandLogo className="w-28 h-28 mb-6" />
            <BrandName />
-           <p className="text-slate-500 mt-2">Seu apoio diário no desenvolvimento</p>
+           <p className="text-slate-500 text-sm mt-3 font-medium">Seu apoio diário no desenvolvimento</p>
         </div>
 
-        <Card className="p-8 animate-fade-in">
+        <Card className="p-8 animate-fade-in rounded-3xl shadow-lg border-none">
           {step === 1 && (
             <>
-              <h2 className="text-xl font-semibold text-slate-700 mb-4">Vamos criar seu perfil!</h2>
-              <p className="text-sm text-slate-500 mb-6">Preencha seus dados para receber materiais exclusivos e suporte.</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-4 text-center">Vamos criar seu perfil!</h2>
+              <p className="text-sm text-slate-500 mb-8 text-center px-4">Preencha seus dados para receber materiais exclusivos e suporte.</p>
               
-              <div className="space-y-4 mb-6">
+              <div className="space-y-5 mb-8">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1 ml-1">Nome da Mãe / Cuidador(a)</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wider">Nome da Mãe / Cuidador(a)</label>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-green-500 transition-colors" />
                     <input 
                       type="text" 
                       placeholder="Seu nome completo" 
-                      className="w-full pl-10 p-3 rounded-xl border border-stone-200 bg-white text-gray-900 focus:ring-2 focus:ring-teal-200 outline-none placeholder:text-slate-400"
+                      className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all placeholder:text-slate-400"
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
                     />
@@ -234,13 +236,13 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1 ml-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wider">Email</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-green-500 transition-colors" />
                     <input 
                       type="email" 
                       placeholder="seu@email.com" 
-                      className="w-full pl-10 p-3 rounded-xl border border-stone-200 bg-white text-gray-900 focus:ring-2 focus:ring-teal-200 outline-none placeholder:text-slate-400"
+                      className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all placeholder:text-slate-400"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -248,13 +250,13 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1 ml-1">Telefone / WhatsApp</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wider">Telefone / WhatsApp</label>
+                  <div className="relative group">
+                    <Phone className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-green-500 transition-colors" />
                     <input 
                       type="tel" 
                       placeholder="(XX) 99999-9999" 
-                      className="w-full pl-10 p-3 rounded-xl border border-stone-200 bg-white text-gray-900 focus:ring-2 focus:ring-teal-200 outline-none placeholder:text-slate-400"
+                      className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all placeholder:text-slate-400"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                     />
@@ -266,6 +268,7 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
                 fullWidth 
                 disabled={!parentName || !email || !phone} 
                 onClick={() => setStep(2)}
+                className="py-4 text-lg shadow-green-200"
               >
                 Continuar
               </Button>
@@ -274,77 +277,98 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
 
           {step === 2 && (
             <>
-              <h2 className="text-xl font-semibold text-slate-700 mb-4">Quem vamos acolher hoje?</h2>
-              <div className="space-y-4 mb-6">
+              <h2 className="text-xl font-bold text-slate-800 mb-4 text-center">Quem vamos acolher hoje?</h2>
+              <div className="space-y-6 mb-8 mt-8">
                 <input 
                   type="text" 
                   placeholder="Nome da criança" 
-                  className="w-full p-4 rounded-xl border border-stone-200 bg-white text-gray-900 text-lg placeholder:text-slate-400"
+                  className="w-full p-4 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 text-lg placeholder:text-slate-400 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none"
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                 />
-                <div className="flex items-center space-x-4">
-                   <label className="text-slate-600 font-medium">Idade:</label>
+                <div className="flex items-center justify-center space-x-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                   <label className="text-slate-600 font-medium">Idade da criança:</label>
                    <input 
                     type="number" 
                     min="1" max="12"
-                    className="p-3 rounded-xl border border-stone-200 bg-white text-gray-900 w-20 text-center text-lg"
+                    className="p-2 rounded-xl border border-stone-200 bg-white text-gray-900 w-20 text-center text-xl font-bold focus:ring-2 focus:ring-green-200 outline-none"
                     value={childAge}
                     onChange={(e) => setChildAge(parseInt(e.target.value))}
                    />
                    <span className="text-slate-500">anos</span>
                 </div>
               </div>
-              <Button fullWidth disabled={!childName} onClick={() => setStep(3)}>Próximo</Button>
+              <Button fullWidth disabled={!childName} onClick={() => setStep(3)} className="py-4">Próximo</Button>
             </>
           )}
 
           {step === 3 && (
             <>
-              <h2 className="text-xl font-semibold text-slate-700 mb-2">Nível de Suporte (Grau TEA)</h2>
-              <p className="text-sm text-slate-500 mb-6">Essa informação ajuda a calibrar a complexidade das atividades.</p>
-              <div className="space-y-3 mb-8">
+              <h2 className="text-xl font-bold text-slate-800 mb-2 text-center">Nível de Suporte</h2>
+              <p className="text-sm text-slate-500 mb-8 text-center">Essa informação ajuda a calibrar a complexidade das atividades.</p>
+              <div className="space-y-4 mb-8">
                 {[1, 2, 3].map((l) => (
                   <div 
                     key={l}
                     onClick={() => setLevel(l as TeaLevel)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${level === l ? 'border-green-500 bg-green-50' : 'border-stone-100 hover:border-green-200'}`}
+                    className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${level === l ? 'border-green-500 bg-green-50 shadow-sm' : 'border-stone-100 hover:border-green-200 hover:bg-stone-50'}`}
                   >
-                    <span className="font-bold text-slate-700">Grau {l}</span>
+                    <div>
+                      <span className={`font-bold text-lg ${level === l ? 'text-green-700' : 'text-slate-700'}`}>Grau {l}</span>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {l === 1 ? 'Suporte Leve' : l === 2 ? 'Suporte Moderado' : 'Suporte Substancial'}
+                      </p>
+                    </div>
+                    {level === l && <CheckCircle className="w-6 h-6 text-green-500" />}
                   </div>
                 ))}
               </div>
-              <Button fullWidth onClick={() => setStep(4)}>Próximo</Button>
+              <Button fullWidth onClick={() => setStep(4)} className="py-4">Próximo</Button>
             </>
           )}
 
           {step === 4 && (
             <>
-              <h2 className="text-xl font-semibold text-slate-700 mb-2">Necessidades Específicas</h2>
-              <p className="text-sm text-slate-500 mb-6">Selecione o que se aplica no momento:</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-2 text-center">Necessidades Específicas</h2>
+              <p className="text-sm text-slate-500 mb-6 text-center">Selecione o que se aplica no momento:</p>
               <div className="space-y-3 mb-8">
-                 <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-stone-50">
-                    <input type="checkbox" checked={needs.food} onChange={e => setNeeds({...needs, food: e.target.checked})} className="w-5 h-5 text-green-500 rounded focus:ring-green-500" />
-                    <span className="text-slate-700">Seletividade Alimentar</span>
+                 <label className={`flex items-center space-x-4 p-4 border rounded-2xl cursor-pointer transition-all ${needs.food ? 'bg-amber-50 border-amber-200' : 'hover:bg-stone-50 border-stone-100'}`}>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center ${needs.food ? 'bg-amber-500 border-amber-500' : 'border-slate-300'}`}>
+                      {needs.food && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                    <input type="checkbox" checked={needs.food} onChange={e => setNeeds({...needs, food: e.target.checked})} className="hidden" />
+                    <span className="text-slate-700 font-medium">Seletividade Alimentar</span>
                  </label>
-                 <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-stone-50">
-                    <input type="checkbox" checked={needs.speech} onChange={e => setNeeds({...needs, speech: e.target.checked})} className="w-5 h-5 text-green-500 rounded focus:ring-green-500" />
-                    <span className="text-slate-700">Atraso na Fala / Comunicação</span>
+                 
+                 <label className={`flex items-center space-x-4 p-4 border rounded-2xl cursor-pointer transition-all ${needs.speech ? 'bg-sky-50 border-sky-200' : 'hover:bg-stone-50 border-stone-100'}`}>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center ${needs.speech ? 'bg-sky-500 border-sky-500' : 'border-slate-300'}`}>
+                      {needs.speech && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                    <input type="checkbox" checked={needs.speech} onChange={e => setNeeds({...needs, speech: e.target.checked})} className="hidden" />
+                    <span className="text-slate-700 font-medium">Atraso na Fala</span>
                  </label>
-                 <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-stone-50">
-                    <input type="checkbox" checked={needs.motor} onChange={e => setNeeds({...needs, motor: e.target.checked})} className="w-5 h-5 text-green-500 rounded focus:ring-green-500" />
-                    <span className="text-slate-700">Dificuldades Motoras</span>
+
+                 <label className={`flex items-center space-x-4 p-4 border rounded-2xl cursor-pointer transition-all ${needs.motor ? 'bg-emerald-50 border-emerald-200' : 'hover:bg-stone-50 border-stone-100'}`}>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center ${needs.motor ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'}`}>
+                      {needs.motor && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                    <input type="checkbox" checked={needs.motor} onChange={e => setNeeds({...needs, motor: e.target.checked})} className="hidden" />
+                    <span className="text-slate-700 font-medium">Dificuldades Motoras</span>
                  </label>
-                 <label className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-stone-50">
-                    <input type="checkbox" checked={needs.sensory} onChange={e => setNeeds({...needs, sensory: e.target.checked})} className="w-5 h-5 text-green-500 rounded focus:ring-green-500" />
-                    <span className="text-slate-700">Questões Sensoriais</span>
+
+                 <label className={`flex items-center space-x-4 p-4 border rounded-2xl cursor-pointer transition-all ${needs.sensory ? 'bg-purple-50 border-purple-200' : 'hover:bg-stone-50 border-stone-100'}`}>
+                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center ${needs.sensory ? 'bg-purple-500 border-purple-500' : 'border-slate-300'}`}>
+                      {needs.sensory && <Check className="w-4 h-4 text-white" />}
+                    </div>
+                    <input type="checkbox" checked={needs.sensory} onChange={e => setNeeds({...needs, sensory: e.target.checked})} className="hidden" />
+                    <span className="text-slate-700 font-medium">Questões Sensoriais</span>
                  </label>
               </div>
-              <div className="bg-rose-50 p-4 rounded-lg mb-6 text-xs text-rose-800 flex items-start">
+              <div className="bg-rose-50 p-4 rounded-xl mb-6 text-xs text-rose-800 flex items-start leading-relaxed">
                 <AlertTriangle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
                 {DISCLAIMER_TEXT}
               </div>
-              <Button fullWidth onClick={handleFinish}>Criar Rotina Personalizada</Button>
+              <Button fullWidth onClick={handleFinish} className="py-4 shadow-lg shadow-green-200">Criar Rotina Personalizada</Button>
             </>
           )}
         </Card>
@@ -810,31 +834,33 @@ const ModulesView = () => {
    if (!activeModule && !activeArticle) {
      return (
        <div className="p-6 pb-24 animate-fade-in">
-          <h1 className="text-2xl font-bold text-slate-800 mb-6">Biblioteca de Apoio</h1>
-          <p className="text-slate-500 text-sm mb-6">Guias práticos e embasados cientificamente para o dia a dia.</p>
-          <div className="grid grid-cols-1 gap-4">
-             {LIBRARY_CONTENT.map((m) => (
-               <div 
-                key={m.id} 
-                onClick={() => setActiveModule(m)}
-                className="flex items-center p-5 bg-white rounded-2xl shadow-sm border border-stone-100 hover:shadow-md transition-all cursor-pointer active:scale-95 group"
-               >
-                  <div className={`w-14 h-14 rounded-2xl ${m.color} flex items-center justify-center text-3xl mr-4 shadow-inner`}>
-                     {m.icon}
-                  </div>
-                  <div className="flex-1">
-                     <h3 className="font-bold text-slate-800 text-lg group-hover:text-green-700 transition-colors">{m.title}</h3>
-                     <p className="text-sm text-slate-500">{m.desc}</p>
-                  </div>
-                  <ChevronRight className="text-slate-300 w-6 h-6" />
-               </div>
-             ))}
-          </div>
-          
-          <div className="mt-8 p-6 bg-green-50 rounded-3xl text-center border border-green-100">
-             <h3 className="font-bold text-green-800 text-lg mb-2">Precisa de ajuda profissional?</h3>
-             <p className="text-green-600 text-sm mb-4">Nosso diretório contém especialistas em TEA na sua região.</p>
-             <Button variant="outline" className="bg-white text-green-600 border-green-200 hover:bg-green-50">Buscar Especialista</Button>
+          <div className="relative z-20 bg-stone-50"> {/* Container with higher Z-index */}
+            <h1 className="text-2xl font-bold text-slate-800 mb-6">Biblioteca de Apoio</h1>
+            <p className="text-slate-500 text-sm mb-6">Guias práticos e embasados cientificamente para o dia a dia.</p>
+            <div className="grid grid-cols-1 gap-4">
+               {LIBRARY_CONTENT.map((m) => (
+                 <div 
+                  key={m.id} 
+                  onClick={() => setActiveModule(m)}
+                  className="flex items-center p-5 bg-white rounded-2xl shadow-sm border border-stone-100 hover:shadow-md transition-all cursor-pointer active:scale-95 group"
+                 >
+                    <div className={`w-14 h-14 rounded-2xl ${m.color} flex items-center justify-center text-3xl mr-4 shadow-inner`}>
+                       {m.icon}
+                    </div>
+                    <div className="flex-1">
+                       <h3 className="font-bold text-slate-800 text-lg group-hover:text-green-700 transition-colors">{m.title}</h3>
+                       <p className="text-sm text-slate-500">{m.desc}</p>
+                    </div>
+                    <ChevronRight className="text-slate-300 w-6 h-6" />
+                 </div>
+               ))}
+            </div>
+            
+            <div className="mt-8 p-6 bg-green-50 rounded-3xl text-center border border-green-100">
+               <h3 className="font-bold text-green-800 text-lg mb-2">Precisa de ajuda profissional?</h3>
+               <p className="text-green-600 text-sm mb-4">Nosso diretório contém especialistas em TEA na sua região.</p>
+               <Button variant="outline" className="bg-white text-green-600 border-green-200 hover:bg-green-50">Buscar Especialista</Button>
+            </div>
           </div>
        </div>
      );
@@ -844,7 +870,7 @@ const ModulesView = () => {
    if (activeModule && !activeArticle) {
       return (
         <div className="min-h-screen bg-stone-50 pb-24 animate-slide-in">
-          <div className={`p-8 pb-12 ${activeModule.color} rounded-b-[2.5rem] relative`}>
+          <div className={`p-8 pb-12 z-0 ${activeModule.color} rounded-b-[2.5rem] relative`}>
              <button 
               onClick={() => setActiveModule(null)}
               className="absolute top-6 left-6 bg-white/60 p-2 rounded-full hover:bg-white transition-colors"
@@ -858,7 +884,7 @@ const ModulesView = () => {
              </div>
           </div>
 
-          <div className="px-6 -mt-8 space-y-4 relative z-10">
+          <div className="px-6 -mt-8 space-y-4 relative z-20">
              {activeModule.articles.map((article) => (
                <Card key={article.id} onClick={() => setActiveArticle(article)} className="p-5 flex items-start gap-4 hover:border-green-300 transition-colors cursor-pointer">
                   <div className="p-3 bg-stone-100 rounded-full">
