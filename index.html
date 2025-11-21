@@ -2,7 +2,14 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- PWA Mobile Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fafaf9">
+    <meta name="mobile-web-app-capable" content="yes">
+    
     <title>AcolheTEA - Apoio para Mães Atípicas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -49,6 +56,7 @@
       body {
         background-color: #fafaf9; /* stone-50 */
         font-family: 'Inter', sans-serif;
+        overscroll-behavior-y: none; /* Previne o efeito de "puxar" no topo da página no mobile */
       }
       /* Custom scrollbar for a cleaner look */
       ::-webkit-scrollbar {
@@ -63,7 +71,6 @@
       }
       
       /* --- CORREÇÃO DE AUTOFILL (INPUT CINZA/BRANCO) --- */
-      /* Força o fundo branco e o texto escuro quando o navegador preenche o campo */
       input:-webkit-autofill,
       input:-webkit-autofill:hover, 
       input:-webkit-autofill:focus, 

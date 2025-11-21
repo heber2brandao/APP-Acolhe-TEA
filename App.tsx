@@ -6,7 +6,7 @@ import {
   Clock, Trash2, Check, X, BookMarked, GraduationCap,
   MessageCircleHeart, Utensils, Lightbulb, Footprints, 
   Sparkles, Palette, Puzzle, Smile, User, Mail, Phone,
-  ChevronRight, FileText
+  ChevronRight, FileText, Calendar as CalendarIcon, Lock, LogOut, Eye, EyeOff
 } from 'lucide-react';
 import { DISCLAIMER_TEXT, LIBRARY_CONTENT } from './constants';
 import { AppState, TeaLevel, ChildProfile, Activity, CompletedActivity, NotificationSettings, AppNotification, ActivityCategory, LibraryModule, LibraryArticle } from './types';
@@ -14,6 +14,13 @@ import { generateDailyRoutine } from './services/routineEngine';
 import { Button } from './components/Button';
 import { Card } from './components/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+// --- TYPES FOR AUTH ---
+interface UserAccount extends AppState {
+  id: string;
+  password?: string; // Simple storage for demo
+  email: string;
+}
 
 // --- CUSTOM LOGO IMAGE ---
 
@@ -23,8 +30,6 @@ const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => {
   if (!error) {
     return (
       <img 
-        // IMPORTANTE: src="logo.png" sem a barra inicial permite que o app
-        // funcione dentro de subpastas em outros servidores.
         src="logo.png" 
         alt="AcolheTEA" 
         className={`object-contain ${className} transition-opacity duration-300`}
@@ -33,16 +38,10 @@ const BrandLogo = ({ className = "w-32 h-32" }: { className?: string }) => {
     );
   }
 
-  // Fallback Premium e Seguro:
-  // Usa ícones nativos (Heart e Sparkles) que já estão carregados no app,
-  // garantindo que não haja erro de importação (tela branca).
   return (
     <div className={`flex items-center justify-center bg-white border border-stone-100 rounded-[2rem] p-6 shadow-sm ${className}`}>
       <div className="relative w-full h-full flex items-center justify-center">
-         {/* Coração central representando o acolhimento */}
          <Heart className="w-full h-full text-green-600" fill="currentColor" fillOpacity={0.1} strokeWidth={1.5} />
-         
-         {/* Detalhe de brilho representando o desenvolvimento */}
          <div className="absolute -top-1 -right-1 bg-amber-400 rounded-full p-1.5 border-4 border-white shadow-sm">
            <Sparkles className="w-4 h-4 text-white" strokeWidth={3} />
          </div>
@@ -183,13 +182,240 @@ const CategoryIllustration = ({ category, className = "" }: { category: Activity
   );
 };
 
+// --- SCREENS: AUTHENTICATION ---
+
+const AuthScreen = ({ onLogin, onRegister }: { onLogin: (e: string, p: string) => void, onRegister: (n: string, e: string, p: string) => void }) => {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = () => {
+    if (!email || !password) {
+      setError("Por favor preencha todos os campos");
+      return;
+    }
+    if (mode === 'register' && !name) {
+      setError("O nome é obrigatório");
+      return;
+    }
+    
+    setError('');
+    if (mode === 'login') {
+      onLogin(email, password);
+    } else {
+      onRegister(name, email, password);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-6">
+      <div className="max-w-md w-full flex flex-col items-center">
+        <BrandLogo className="w-32 h-32 mb-6" />
+        <BrandName className="mb-10" />
+
+        <Card className="w-full p-8 rounded-3xl border-none shadow-xl">
+          <h2 className="text-2xl font-bold text-slate-800 text-center mb-6">
+            {mode === 'login' ? 'Bem-vinda de volta' : 'Criar Conta'}
+          </h2>
+
+          {error && (
+            <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-sm font-medium mb-4 text-center">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {mode === 'register' && (
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Seu Nome</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                  <input 
+                    type="text" 
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Nome completo"
+                    className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">E-mail</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 ml-1">Senha</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                <input 
+                  type={showPass ? "text" : "password"} 
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="******"
+                  className="w-full pl-12 pr-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                />
+                <button 
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600"
+                >
+                  {showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <Button fullWidth onClick={handleSubmit} className="py-4 mt-4 text-lg shadow-green-200">
+              {mode === 'login' ? 'Entrar' : 'Cadastrar'}
+            </Button>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-slate-500 text-sm">
+              {mode === 'login' ? 'Não tem uma conta?' : 'Já tem conta?'}
+              <button 
+                onClick={() => {
+                  setMode(mode === 'login' ? 'register' : 'login');
+                  setError('');
+                }}
+                className="ml-2 text-green-600 font-bold hover:underline"
+              >
+                {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+              </button>
+            </p>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+// --- SCREEN: CALENDAR ---
+
+const CalendarView = ({ history, onBack }: { history: CompletedActivity[], onBack: () => void }) => {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  
+  // Helpers
+  const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const getFirstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // 0 = Sun, 1 = Mon...
+
+  const daysInMonth = getDaysInMonth(currentMonth);
+  const firstDay = getFirstDayOfMonth(currentMonth);
+  
+  const monthName = currentMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+
+  // Map history to days
+  const historyMap = useMemo(() => {
+    const map: Record<number, number> = {}; // Day -> Count
+    history.forEach(h => {
+      const d = new Date(h.date);
+      // Check if matches current view month/year
+      if (d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear()) {
+        map[d.getDate()] = (map[d.getDate()] || 0) + 1;
+      }
+    });
+    return map;
+  }, [history, currentMonth]);
+
+  const renderDays = () => {
+    const days = [];
+    // Padding for empty days
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="h-14"></div>);
+    }
+    // Real days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const count = historyMap[i] || 0;
+      const isToday = i === today.getDate() && currentMonth.getMonth() === today.getMonth() && currentMonth.getFullYear() === today.getFullYear();
+      
+      days.push(
+        <div key={i} className={`h-14 rounded-xl flex flex-col items-center justify-center relative border ${isToday ? 'border-green-500 bg-green-50' : 'border-stone-100 bg-white'}`}>
+          <span className={`text-sm font-bold ${isToday ? 'text-green-700' : 'text-slate-600'}`}>{i}</span>
+          {count > 0 && (
+            <div className="flex mt-1 gap-0.5">
+               {Array.from({length: Math.min(count, 3)}).map((_, idx) => (
+                 <div key={idx} className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+               ))}
+               {count > 3 && <div className="w-1.5 h-1.5 bg-green-300 rounded-full"></div>}
+            </div>
+          )}
+        </div>
+      );
+    }
+    return days;
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-50 pb-24">
+       <div className="p-6 bg-white rounded-b-3xl shadow-sm">
+          <div className="flex items-center mb-6">
+            <button onClick={onBack} className="p-2 hover:bg-stone-100 rounded-full">
+               <ArrowLeft className="w-6 h-6 text-slate-600" />
+            </button>
+            <h1 className="text-xl font-bold text-slate-800 ml-2">Calendário de Atividades</h1>
+          </div>
+
+          <div className="flex items-center justify-between mb-6 bg-stone-50 p-2 rounded-2xl">
+             <button onClick={prevMonth} className="p-2 hover:bg-white rounded-xl transition-colors">
+               <ChevronRight className="w-5 h-5 rotate-180 text-slate-600" />
+             </button>
+             <h2 className="font-bold text-slate-800 capitalize">{monthName}</h2>
+             <button onClick={nextMonth} className="p-2 hover:bg-white rounded-xl transition-colors">
+               <ChevronRight className="w-5 h-5 text-slate-600" />
+             </button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-2 mb-2 text-center">
+            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(d => (
+              <span key={d} className="text-xs text-slate-400 font-medium uppercase">{d}</span>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-7 gap-2">
+             {renderDays()}
+          </div>
+       </div>
+
+       <div className="p-6">
+          <h3 className="font-bold text-slate-700 mb-4">Resumo do Mês</h3>
+          <div className="grid grid-cols-2 gap-4">
+             <Card className="bg-white flex flex-col items-center p-4">
+                <span className="text-3xl font-bold text-green-600">{Object.values(historyMap).reduce((a,b) => a+b, 0)}</span>
+                <span className="text-xs text-slate-400 mt-1 text-center uppercase">Atividades Feitas</span>
+             </Card>
+             <Card className="bg-white flex flex-col items-center p-4">
+                <span className="text-3xl font-bold text-amber-500">{Object.keys(historyMap).length}</span>
+                <span className="text-xs text-slate-400 mt-1 text-center uppercase">Dias Ativos</span>
+             </Card>
+          </div>
+       </div>
+    </div>
+  );
+};
+
 // --- SUB-COMPONENTS ---
 
-const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, phone: string, child: ChildProfile) => void }) => {
+const Onboarding = ({ onComplete }: { onComplete: (name: string, phone: string, child: ChildProfile) => void }) => {
   const [step, setStep] = useState(1);
   // Campos do Responsável
   const [parentName, setParentName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
   // Campos da Criança
@@ -213,7 +439,7 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
       hasMotorDifficulty: needs.motor,
       hasSensoryIssues: needs.sensory
     };
-    onComplete(parentName, email, phone, profile);
+    onComplete(parentName, phone, profile);
   };
 
   return (
@@ -229,7 +455,7 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
           {step === 1 && (
             <>
               <h2 className="text-xl font-bold text-slate-800 mb-4 text-center">Vamos criar seu perfil!</h2>
-              <p className="text-sm text-slate-500 mb-8 text-center px-4">Preencha seus dados para receber materiais exclusivos e suporte.</p>
+              <p className="text-sm text-slate-500 mb-8 text-center px-4">Já temos seu email, precisamos apenas de alguns detalhes.</p>
               
               <div className="space-y-5 mb-8">
                 <div>
@@ -242,20 +468,6 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
                       className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all placeholder:text-slate-400"
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1.5 ml-1 uppercase tracking-wider">Email</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-green-500 transition-colors" />
-                    <input 
-                      type="email" 
-                      placeholder="seu@email.com" 
-                      className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-gray-900 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all placeholder:text-slate-400"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                 </div>
@@ -277,7 +489,7 @@ const Onboarding = ({ onComplete }: { onComplete: (name: string, email: string, 
 
               <Button 
                 fullWidth 
-                disabled={!parentName || !email || !phone} 
+                disabled={!parentName || !phone} 
                 onClick={() => setStep(2)}
                 className="py-4 text-lg shadow-green-200"
               >
@@ -453,11 +665,13 @@ const NotificationCenter = ({
 const SettingsView = ({ 
   settings, 
   onUpdateSettings, 
-  childName 
+  childName,
+  onLogout
 }: { 
   settings: NotificationSettings, 
   onUpdateSettings: (s: NotificationSettings) => void,
-  childName: string
+  childName: string,
+  onLogout: () => void
 }) => {
   
   const requestPermission = () => {
@@ -552,8 +766,13 @@ const SettingsView = ({
         </div>
       </Card>
 
-      <div className="bg-green-50 p-4 rounded-xl text-sm text-green-800 border border-green-100">
-        <p>💡 <strong>Dica:</strong> As notificações funcionam melhor se você mantiver esta aba aberta ou fixada no navegador do celular.</p>
+      <Button fullWidth variant="outline" onClick={onLogout} className="border-rose-200 text-rose-500 hover:bg-rose-50">
+        <LogOut className="w-4 h-4 mr-2" />
+        Sair da Conta
+      </Button>
+      
+      <div className="text-center mt-8 text-xs text-slate-400">
+        <p>AcolheTEA v1.1.0</p>
       </div>
     </div>
   );
@@ -565,14 +784,16 @@ const Dashboard = ({
   onOpenActivity, 
   userName,
   notifications,
-  onOpenNotifications
+  onOpenNotifications,
+  onOpenCalendar
 }: { 
   child: ChildProfile, 
   routine: Activity[], 
   onOpenActivity: (a: Activity) => void,
   userName: string,
   notifications: AppNotification[],
-  onOpenNotifications: () => void
+  onOpenNotifications: () => void,
+  onOpenCalendar: () => void
 }) => {
   const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -619,7 +840,9 @@ const Dashboard = ({
       <main className="px-6 space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Rotina de Hoje</h2>
-          <button className="text-green-600 text-sm font-medium">Ver calendário</button>
+          <button onClick={onOpenCalendar} className="text-green-600 text-sm font-medium flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors">
+            <CalendarIcon className="w-4 h-4" /> Ver calendário
+          </button>
         </div>
 
         <div className="space-y-4">
@@ -966,54 +1189,89 @@ const ModulesView = () => {
 // --- MAIN APP COMPONENT ---
 
 export default function App() {
-  const [view, setView] = useState<'onboarding' | 'dashboard' | 'progress' | 'modules' | 'detail' | 'settings'>('onboarding');
+  // New State for Auth
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
+  const [usersDB, setUsersDB] = useState<UserAccount[]>(() => {
+    // Initialize simulated DB from localStorage
+    const db = localStorage.getItem('acolhetea_db');
+    return db ? JSON.parse(db) : [];
+  });
+
+  const [view, setView] = useState<'onboarding' | 'dashboard' | 'progress' | 'modules' | 'detail' | 'settings' | 'calendar'>('dashboard');
   const [showNotifications, setShowNotifications] = useState(false);
-  
-  const [state, setState] = useState<AppState>(() => {
-     const saved = localStorage.getItem('acolhetea_state');
-     if (saved) {
-       const parsed = JSON.parse(saved);
-       // Migrate old state if necessary
-       if (!parsed.settings) {
-         parsed.settings = {
-           enabled: false,
-           morningReminder: "09:00",
-           afternoonReminder: "15:00",
-           smartTips: true,
-           inactivityAlert: true
-         };
-       }
-       if (!parsed.notifications) parsed.notifications = [];
-       if (!parsed.lastNotificationCheck) parsed.lastNotificationCheck = "";
-       return parsed;
-     }
-     return {
-       user: null,
-       child: null,
-       onboardingComplete: false,
-       history: [],
-       notifications: [],
-       settings: {
+  const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
+
+  // --- AUTH EFFECTS ---
+
+  // Save DB whenever it changes
+  useEffect(() => {
+    if (usersDB.length > 0) {
+      localStorage.setItem('acolhetea_db', JSON.stringify(usersDB));
+    }
+  }, [usersDB]);
+
+  // Update DB when current user state changes (sync session to DB)
+  useEffect(() => {
+    if (currentUser) {
+      setUsersDB(prev => prev.map(u => u.id === currentUser.id ? currentUser : u));
+    }
+  }, [currentUser]);
+
+
+  // --- AUTH HANDLERS ---
+
+  const handleRegister = (name: string, email: string, pass: string) => {
+    // Check if email exists
+    if (usersDB.find(u => u.email === email)) {
+      alert("Este email já está cadastrado.");
+      return;
+    }
+
+    const newUser: UserAccount = {
+      id: Date.now().toString(),
+      email,
+      password: pass, // In a real app, this would be hashed!
+      user: { name, email, phone: '' },
+      child: null,
+      onboardingComplete: false,
+      history: [],
+      notifications: [],
+      settings: {
          enabled: false,
          morningReminder: "09:00",
          afternoonReminder: "15:00",
          smartTips: true,
          inactivityAlert: true
-       },
-       lastNotificationCheck: ""
-     };
-  });
+      },
+      lastNotificationCheck: ""
+    };
 
-  const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
+    setUsersDB([...usersDB, newUser]);
+    setCurrentUser(newUser);
+    setView('onboarding'); // New users go to onboarding
+  };
 
-  // Persist state
-  useEffect(() => {
-    localStorage.setItem('acolhetea_state', JSON.stringify(state));
-  }, [state]);
+  const handleLogin = (email: string, pass: string) => {
+    const user = usersDB.find(u => u.email === email && u.password === pass);
+    if (user) {
+      setCurrentUser(user);
+      setView(user.onboardingComplete ? 'dashboard' : 'onboarding');
+    } else {
+      alert("Email ou senha inválidos.");
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setView('dashboard'); // Will default to AuthScreen because currentUser is null
+  };
+
+
+  // --- APP LOGIC ---
 
   // Notification Logic Engine
   useEffect(() => {
-    if (!state.settings.enabled || !state.child) return;
+    if (!currentUser || !currentUser.settings.enabled || !currentUser.child) return;
 
     const checkNotifications = () => {
       const now = new Date();
@@ -1021,10 +1279,8 @@ export default function App() {
       const dateString = now.toDateString(); // "Mon Sep 28 2024"
       
       // Prevent multiple triggers per day for same reminders
-      // A simplistic way is to store "lastNotificationCheck" as date string
-      if (state.lastNotificationCheck === dateString) {
-         // Optionally we could allow checking exact times here if we stored "lastMorningCheck", "lastAfternoonCheck"
-         // For simplicity of this demo, we'll just check exact minute match and hope state update prevents loops
+      if (currentUser.lastNotificationCheck === dateString + "-" + timeString) {
+         return;
       }
 
       const newNotifs: AppNotification[] = [];
@@ -1049,59 +1305,39 @@ export default function App() {
       };
 
       // 1. Morning Reminder
-      if (timeString === state.settings.morningReminder && state.lastNotificationCheck !== (dateString + "-morning")) {
-         trigger(`Bom dia, ${state.user?.name}!`, `As atividades de hoje para ${state.child.name} já estão prontas.`, 'reminder');
-         // Mark as checked for this specific time slot in a real app, using a simpler hack here
-         setState(prev => ({...prev, lastNotificationCheck: dateString + "-morning"}));
-         return; // Early return to avoid double set state
+      if (timeString === currentUser.settings.morningReminder && !currentUser.lastNotificationCheck.includes(dateString + "-morning")) {
+         trigger(`Bom dia, ${currentUser.user?.name}!`, `As atividades de hoje para ${currentUser.child.name} já estão prontas.`, 'reminder');
+         setCurrentUser(prev => prev ? ({...prev, lastNotificationCheck: dateString + "-morning"}) : null);
+         return; 
       }
 
       // 2. Afternoon Reminder
-      if (timeString === state.settings.afternoonReminder && state.lastNotificationCheck !== (dateString + "-afternoon")) {
-         trigger(`Hora da atividade!`, `Que tal tirar 15 minutinhos com o ${state.child.name} agora?`, 'reminder');
-         setState(prev => ({...prev, lastNotificationCheck: dateString + "-afternoon"}));
+      if (timeString === currentUser.settings.afternoonReminder && !currentUser.lastNotificationCheck.includes(dateString + "-afternoon")) {
+         trigger(`Hora da atividade!`, `Que tal tirar 15 minutinhos com o ${currentUser.child.name} agora?`, 'reminder');
+         setCurrentUser(prev => prev ? ({...prev, lastNotificationCheck: dateString + "-afternoon"}) : null);
          return;
       }
 
-      // 3. Inactivity Alert (Smart Tip)
-      if (state.settings.inactivityAlert) {
-        // Check if last activity was > 24h ago
-        const lastActivity = state.history.length > 0 ? new Date(state.history[0].date).getTime() : 0;
-        const hoursSince = (now.getTime() - lastActivity) / (1000 * 60 * 60);
-        
-        if (hoursSince > 24 && hoursSince < 25 && state.lastNotificationCheck !== (dateString + "-inactivity")) {
-           trigger(`Sentimos sua falta!`, `Registrar o progresso ajuda a ver a evolução do ${state.child.name}. Vamos tentar uma atividade simples hoje?`, 'tip');
-           setState(prev => ({...prev, lastNotificationCheck: dateString + "-inactivity"}));
-           return;
-        }
-      }
-
       if (shouldUpdate) {
-        setState(prev => ({
+        setCurrentUser(prev => prev ? ({
           ...prev,
           notifications: [...newNotifs, ...prev.notifications]
-        }));
+        }) : null);
       }
     };
 
     const interval = setInterval(checkNotifications, 60000); // Check every minute
     return () => clearInterval(interval);
-  }, [state.settings, state.child, state.user, state.history, state.lastNotificationCheck]);
+  }, [currentUser]);
 
-  // Determine initial view
-  useEffect(() => {
-    if (state.onboardingComplete) {
-       if(view === 'onboarding') setView('dashboard');
-    }
-  }, [state.onboardingComplete]);
-
-  const handleOnboardingComplete = (parentName: string, email: string, phone: string, child: ChildProfile) => {
-    setState(prev => ({
-      ...prev,
-      user: { name: parentName, email: email, phone: phone },
+  const handleOnboardingComplete = (parentName: string, phone: string, child: ChildProfile) => {
+    if (!currentUser) return;
+    setCurrentUser({
+      ...currentUser,
+      user: { ...currentUser.user!, name: parentName, phone: phone },
       child: child,
       onboardingComplete: true
-    }));
+    });
     setView('dashboard');
   };
 
@@ -1111,7 +1347,7 @@ export default function App() {
   };
 
   const handleCompleteActivity = (feedback: 'easy' | 'medium' | 'hard') => {
-    if (!currentActivity) return;
+    if (!currentActivity || !currentUser) return;
     
     const newEntry: CompletedActivity = {
       activityId: currentActivity.id,
@@ -1120,35 +1356,41 @@ export default function App() {
     };
 
     // Logic for immediate achievement notification
-    const newNotifs = [...state.notifications];
-    if (state.history.length % 5 === 4) { // Every 5 activities (4 + current 1)
+    const newNotifs = [...currentUser.notifications];
+    if (currentUser.history.length % 5 === 4) { // Every 5 activities (4 + current 1)
        newNotifs.unshift({
          id: Date.now().toString(),
          title: "Parabéns!",
-         message: `Você completou ${state.history.length + 1} atividades! O ${state.child?.name} está evoluindo.`,
+         message: `Você completou ${currentUser.history.length + 1} atividades! O ${currentUser.child?.name} está evoluindo.`,
          type: 'achievement',
          isRead: false,
          createdAt: new Date().toISOString()
        });
     }
 
-    setState(prev => ({
-      ...prev,
-      history: [newEntry, ...prev.history],
+    setCurrentUser({
+      ...currentUser,
+      history: [newEntry, ...currentUser.history],
       notifications: newNotifs
-    }));
+    });
     
     setView('dashboard');
   };
 
   // Generate Routine
   const dailyRoutine = useMemo(() => {
-    if (!state.child) return [];
-    return generateDailyRoutine(state.child);
-  }, [state.child]);
+    if (!currentUser?.child) return [];
+    return generateDailyRoutine(currentUser.child);
+  }, [currentUser?.child]);
 
-  // View Routing
-  if (view === 'onboarding' || !state.child) {
+
+  // --- RENDER ---
+
+  if (!currentUser) {
+    return <AuthScreen onLogin={handleLogin} onRegister={handleRegister} />;
+  }
+
+  if (!currentUser.onboardingComplete || view === 'onboarding') {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
@@ -1161,48 +1403,59 @@ export default function App() {
       />
     );
   }
+  
+  if (view === 'calendar') {
+    return (
+      <CalendarView 
+        history={currentUser.history} 
+        onBack={() => setView('dashboard')} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 text-slate-800 font-sans max-w-lg mx-auto shadow-2xl overflow-hidden relative">
       
       {showNotifications && (
         <NotificationCenter 
-          notifications={state.notifications}
+          notifications={currentUser.notifications}
           onClose={() => setShowNotifications(false)}
           onMarkRead={(id) => {
-            setState(prev => ({
+            setCurrentUser(prev => prev ? ({
               ...prev,
               notifications: prev.notifications.map(n => n.id === id ? {...n, isRead: true} : n)
-            }));
+            }) : null);
           }}
           onClearAll={() => {
-             setState(prev => ({ ...prev, notifications: [] }));
+             setCurrentUser(prev => prev ? ({ ...prev, notifications: [] }) : null);
           }}
         />
       )}
 
       <div className="h-full overflow-y-auto scroll-smooth">
-        {view === 'dashboard' && (
+        {view === 'dashboard' && currentUser.child && (
           <Dashboard 
-            child={state.child} 
-            userName={state.user?.name || 'Mãe'} 
+            child={currentUser.child} 
+            userName={currentUser.user?.name || 'Mãe'} 
             routine={dailyRoutine} 
             onOpenActivity={handleOpenActivity}
-            notifications={state.notifications}
+            notifications={currentUser.notifications}
             onOpenNotifications={() => setShowNotifications(true)}
+            onOpenCalendar={() => setView('calendar')}
           />
         )}
-        {view === 'progress' && (
-          <ProgressView history={state.history} childName={state.child.name} />
+        {view === 'progress' && currentUser.child && (
+          <ProgressView history={currentUser.history} childName={currentUser.child.name} />
         )}
         {view === 'modules' && (
           <ModulesView />
         )}
-        {view === 'settings' && (
+        {view === 'settings' && currentUser.child && (
           <SettingsView 
-            settings={state.settings} 
-            childName={state.child.name}
-            onUpdateSettings={(newSettings) => setState(prev => ({...prev, settings: newSettings}))} 
+            settings={currentUser.settings} 
+            childName={currentUser.child.name}
+            onUpdateSettings={(newSettings) => setCurrentUser(prev => prev ? ({...prev, settings: newSettings}) : null)} 
+            onLogout={handleLogout}
           />
         )}
       </div>
