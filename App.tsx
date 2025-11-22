@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Heart, Home, BarChart2, BookOpen, ArrowLeft, 
@@ -1393,7 +1394,19 @@ const ModulesView = () => {
 
 export default function App() {
   // New State for Auth
-  const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
+  // Modified to read session ID from localStorage for persistence
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
+      const storedSessionId = localStorage.getItem('acolhetea_session_user_id');
+      const dbStr = localStorage.getItem('acolhetea_db');
+      
+      if (storedSessionId && dbStr) {
+         const db: UserAccount[] = JSON.parse(dbStr);
+         const foundUser = db.find(u => u.id === storedSessionId);
+         return foundUser || null;
+      }
+      return null;
+  });
+
   const [usersDB, setUsersDB] = useState<UserAccount[]>(() => {
     // Initialize simulated DB from localStorage
     const db = localStorage.getItem('acolhetea_db');
@@ -1481,6 +1494,7 @@ export default function App() {
 
     setUsersDB([...usersDB, newUser]);
     setCurrentUser(newUser);
+    localStorage.setItem('acolhetea_session_user_id', newUser.id); // Auto-login session
     setView('onboarding'); // New users go to onboarding
   };
 
@@ -1488,6 +1502,7 @@ export default function App() {
     const user = usersDB.find(u => u.email === email && u.password === pass);
     if (user) {
       setCurrentUser(user);
+      localStorage.setItem('acolhetea_session_user_id', user.id); // Save session
       setView(user.onboardingComplete ? 'dashboard' : 'onboarding');
     } else {
       alert("Email ou senha inválidos.");
@@ -1496,6 +1511,7 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('acolhetea_session_user_id'); // Clear session
     setView('dashboard'); // Will default to AuthScreen because currentUser is null
   };
 
@@ -1565,12 +1581,15 @@ export default function App() {
 
   const handleOnboardingComplete = (parentName: string, phone: string, child: ChildProfile) => {
     if (!currentUser) return;
-    setCurrentUser({
+    const updatedUser = {
       ...currentUser,
       user: { ...currentUser.user!, name: parentName, phone: phone },
       child: child,
       onboardingComplete: true
-    });
+    };
+    setCurrentUser(updatedUser);
+    // Update session storage logic not needed here as effect handles DB sync, 
+    // but ensures session persistence works on next reload
     setView('dashboard');
   };
 
