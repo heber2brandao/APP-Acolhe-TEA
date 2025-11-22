@@ -77,6 +77,24 @@ export const ACTIVITY_DATABASE: Activity[] = [
     benefits: ['Atenção auditiva', 'Vocabulário', 'Interação diádica'],
     suitableFor: { maxAge: 6, needsSpeechFocus: true }
   },
+  // NÍVEL 3: Comunicação não verbal e Causa/Efeito
+  {
+    id: 'comm-05',
+    title: 'Bolhas de Sabão (Peça Mais)',
+    category: ActivityCategory.COMMUNICATION,
+    objective: 'Estimular o contato visual e pedido simples.',
+    scientificBasis: 'Atividade de alta motivação. Usada para ensinar a função pragmática de "pedir" (Mando).',
+    durationMin: 10,
+    materials: ['Pote de bolhas de sabão'],
+    steps: [
+      'Faça bolhas e deixe a criança estourar.',
+      'Feche o pote e espere.',
+      'Só faça mais bolhas se a criança olhar para você, entregar o pote ou fazer um som.',
+      'Diga "Mais bolhas!" e assopre.'
+    ],
+    benefits: ['Contato visual', 'Comunicação intencional', 'Rastreamento visual'],
+    suitableFor: { levels: [TeaLevel.LEVEL_2, TeaLevel.LEVEL_3], needsSpeechFocus: true }
+  },
 
   // --- SENSORY (Integração Sensorial / Ayres) ---
   {
@@ -147,6 +165,41 @@ export const ACTIVITY_DATABASE: Activity[] = [
     benefits: ['Tolerância sensorial', 'Diversão', 'Coordenação motora'],
     suitableFor: { needsSensoryFocus: true, minAge: 2 }
   },
+  // NÍVEL 3: Regulação e Estímulo Visual
+  {
+    id: 'sens-05',
+    title: 'Garrafa da Calma (Visual)',
+    category: ActivityCategory.SENSORY,
+    objective: 'Regulação emocional através de foco visual.',
+    scientificBasis: 'O movimento lento do glitter na água ajuda a baixar a frequência cardíaca e focar a atenção (Mindfulness visual).',
+    durationMin: 15,
+    materials: ['Garrafa plástica transparente', 'Água', 'Glitter/Purpurina', 'Corante', 'Cola glitter'],
+    steps: [
+      'Encha a garrafa com água morna.',
+      'Adicione bastante cola glitter e purpurina.',
+      'Feche muito bem a tampa (passe fita ou cola quente).',
+      'Agite e mostre para a criança observar o movimento lento caindo.'
+    ],
+    benefits: ['Autorregulação', 'Atenção sustentada', 'Relaxamento'],
+    suitableFor: { levels: [TeaLevel.LEVEL_1, TeaLevel.LEVEL_2, TeaLevel.LEVEL_3], needsSensoryFocus: true }
+  },
+  {
+    id: 'sens-06',
+    title: 'Túnel de Cobertor',
+    category: ActivityCategory.SENSORY,
+    objective: 'Consciência corporal e segurança.',
+    scientificBasis: 'Espaços contidos e escuros costumam oferecer segurança para crianças em sobrecarga sensorial.',
+    durationMin: 10,
+    materials: ['Cadeiras', 'Cobertores pesados'],
+    steps: [
+      'Monte uma cabana ou túnel com as cadeiras e cobertores.',
+      'Deixe o ambiente meio escuro lá dentro.',
+      'Convide a criança a entrar com uma lanterna ou brinquedo que brilha.',
+      'Não force a entrada, deixe ela explorar.'
+    ],
+    benefits: ['Segurança emocional', 'Regulação', 'Exploração'],
+    suitableFor: { levels: [TeaLevel.LEVEL_3], needsSensoryFocus: true }
+  },
 
   // --- COGNITIVE (TEACCH / Psicopedagogia) ---
   {
@@ -215,6 +268,24 @@ export const ACTIVITY_DATABASE: Activity[] = [
     ],
     benefits: ['Autonomia doméstica', 'Classificação', 'Coordenação motora'],
     suitableFor: { minAge: 4 }
+  },
+  // NÍVEL 3: Permanência do Objeto
+  {
+    id: 'cog-05',
+    title: 'Cadê o Brinquedo? (Permanência)',
+    category: ActivityCategory.COGNITIVE,
+    objective: 'Entender que objetos continuam existindo mesmo escondidos.',
+    scientificBasis: 'Habilidade cognitiva fundamental (Piaget) que precede a linguagem.',
+    durationMin: 10,
+    materials: ['Brinquedo favorito', 'Pano ou caixa'],
+    steps: [
+      'Mostre o brinquedo para a criança.',
+      'Cubra parcialmente com o pano.',
+      'Pergunte "Cadê?" e incentive ela a puxar o pano.',
+      'Depois cubra totalmente e ajude a descobrir.'
+    ],
+    benefits: ['Memória de trabalho', 'Resolução de problemas', 'Atenção conjunta'],
+    suitableFor: { levels: [TeaLevel.LEVEL_3], minAge: 1 }
   },
 
   // --- FEEDING (Selectivity / SOS Approach) ---
@@ -319,6 +390,23 @@ export const ACTIVITY_DATABASE: Activity[] = [
     ],
     benefits: ['Coordenação bilateral', 'Força manual', 'Alívio de tensão'],
     suitableFor: { minAge: 2 }
+  },
+  // NÍVEL 3: Estimulação Motora Simples
+  {
+    id: 'ot-05',
+    title: 'Estourar Plástico Bolha',
+    category: ActivityCategory.OT,
+    objective: 'Força nos dedos e feedback sensorial auditivo/tátil.',
+    scientificBasis: 'Atividade de causa e efeito imediato que trabalha a musculatura da mão.',
+    durationMin: 15,
+    materials: ['Plástico bolha'],
+    steps: [
+      'Dê um pedaço de plástico bolha.',
+      'Ensine a apertar com o polegar e indicador até fazer "pop".',
+      'Pode pisar descalço também para estímulo plantar.'
+    ],
+    benefits: ['Modulação sensorial', 'Pinça fina', 'Diversão'],
+    suitableFor: { levels: [TeaLevel.LEVEL_2, TeaLevel.LEVEL_3], minAge: 2 }
   },
 
   // --- SOCIAL (Floortime / DIR / Habilidades Sociais) ---

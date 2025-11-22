@@ -1,4 +1,5 @@
 
+
 export enum TeaLevel {
   LEVEL_1 = 1,
   LEVEL_2 = 2,
@@ -49,6 +50,7 @@ export interface CompletedActivity {
   activityId: string;
   date: string; // ISO Date string
   feedback: 'easy' | 'medium' | 'hard' | 'skipped';
+  observation?: string; // NOVO: Campo para avaliação escrita da mãe
 }
 
 export interface NotificationSettings {
@@ -86,6 +88,12 @@ export interface LibraryModule {
   articles: LibraryArticle[];
 }
 
+// Estrutura para salvar a rotina do dia
+export interface DailyRoutineState {
+  date: string; // "DD/MM/YYYY"
+  activities: Activity[];
+}
+
 export interface AppState {
   user: {
     name: string;
@@ -95,6 +103,7 @@ export interface AppState {
   child: ChildProfile | null;
   onboardingComplete: boolean;
   history: CompletedActivity[];
+  dailyRoutine?: DailyRoutineState; // NOVO: Salva a rotina gerada para o dia
   notifications: AppNotification[];
   settings: NotificationSettings;
   lastNotificationCheck: string; // Date string to prevent duplicate daily notifs

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Heart, Home, BarChart2, BookOpen, ArrowLeft, 
@@ -7,7 +6,7 @@ import {
   MessageCircleHeart, Utensils, Lightbulb, Footprints, 
   Sparkles, Palette, Puzzle, Smile, User, Mail, Phone,
   ChevronRight, FileText, Calendar as CalendarIcon, Lock, LogOut, Eye, EyeOff,
-  Download, Share, MoreVertical
+  Download, Share, MoreVertical, ClipboardList, TrendingUp, AlertCircle
 } from 'lucide-react';
 import { DISCLAIMER_TEXT, LIBRARY_CONTENT } from './constants';
 import { AppState, TeaLevel, ChildProfile, Activity, CompletedActivity, NotificationSettings, AppNotification, ActivityCategory, LibraryModule, LibraryArticle } from './types';
@@ -239,7 +238,7 @@ const AuthScreen = ({ onLogin, onRegister }: { onLogin: (e: string, p: string) =
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Nome completo"
-                    className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                    className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-slate-800 focus:ring-2 focus:ring-green-200 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -254,7 +253,7 @@ const AuthScreen = ({ onLogin, onRegister }: { onLogin: (e: string, p: string) =
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                  className="w-full pl-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-slate-800 focus:ring-2 focus:ring-green-200 outline-none transition-all"
                 />
               </div>
             </div>
@@ -268,7 +267,7 @@ const AuthScreen = ({ onLogin, onRegister }: { onLogin: (e: string, p: string) =
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="******"
-                  className="w-full pl-12 pr-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                  className="w-full pl-12 pr-12 p-3.5 rounded-2xl border border-stone-200 bg-stone-50/50 text-slate-800 focus:ring-2 focus:ring-green-200 outline-none transition-all"
                 />
                 <button 
                   onClick={() => setShowPass(!showPass)}
@@ -398,7 +397,7 @@ const CalendarView = ({ history, onBack }: { history: CompletedActivity[], onBac
           <h3 className="font-bold text-slate-700 mb-4">Resumo do Mês</h3>
           <div className="grid grid-cols-2 gap-4">
              <Card className="bg-white flex flex-col items-center p-4">
-                <span className="text-3xl font-bold text-green-600">{Object.values(historyMap).reduce((a,b) => a+b, 0)}</span>
+                <span className="text-3xl font-bold text-green-600">{Object.values(historyMap).reduce((a: number, b: number) => a+b, 0)}</span>
                 <span className="text-xs text-slate-400 mt-1 text-center uppercase">Atividades Feitas</span>
              </Card>
              <Card className="bg-white flex flex-col items-center p-4">
@@ -853,7 +852,9 @@ const Dashboard = ({
   userName,
   notifications,
   onOpenNotifications,
-  onOpenCalendar
+  onOpenCalendar,
+  installPrompt,
+  onInstallClick
 }: { 
   child: ChildProfile, 
   routine: Activity[], 
@@ -861,7 +862,9 @@ const Dashboard = ({
   userName: string,
   notifications: AppNotification[],
   onOpenNotifications: () => void,
-  onOpenCalendar: () => void
+  onOpenCalendar: () => void,
+  installPrompt: any,
+  onInstallClick: () => void
 }) => {
   const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -889,6 +892,27 @@ const Dashboard = ({
             </div>
           </div>
         </div>
+
+        {/* --- INSTALL PROMPT BUTTON --- */}
+        {installPrompt && (
+          <div className="mt-6 animate-fade-in">
+            <button 
+              onClick={onInstallClick}
+              className="w-full bg-slate-800 text-white p-3 rounded-xl flex items-center justify-between hover:bg-slate-900 transition-colors shadow-lg shadow-slate-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-lg">
+                   <Download className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-sm">Instalar App</p>
+                  <p className="text-xs text-slate-300">Acesse mais rápido da tela inicial</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+        )}
         
         <div className="mt-6 flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
           <div className="bg-rose-100 text-rose-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
@@ -953,7 +977,9 @@ const Dashboard = ({
   );
 };
 
-const ActivityDetail = ({ activity, onBack, onComplete }: { activity: Activity, onBack: () => void, onComplete: (feedback: 'easy' | 'medium' | 'hard') => void }) => {
+const ActivityDetail = ({ activity, onBack, onComplete }: { activity: Activity, onBack: () => void, onComplete: (feedback: 'easy' | 'medium' | 'hard', note: string) => void }) => {
+  const [note, setNote] = useState('');
+
   return (
     <div className="min-h-screen bg-white pb-24">
        <div className="relative h-64">
@@ -1022,17 +1048,29 @@ const ActivityDetail = ({ activity, onBack, onComplete }: { activity: Activity, 
             </div>
 
             <div className="pt-4 border-t border-slate-100">
-               <h3 className="text-center text-slate-500 font-medium mb-4">Como foi a atividade?</h3>
+               <h3 className="text-center text-slate-700 font-bold text-lg mb-2">Avaliação da Atividade</h3>
+               <p className="text-center text-slate-500 text-sm mb-6">Como foi o desempenho e o interesse?</p>
+               
+               <div className="mb-6">
+                  <label className="block text-xs font-bold text-slate-600 mb-2 ml-1 uppercase tracking-wider">Observações (Opcional)</label>
+                  <textarea 
+                    placeholder="Ex: Ele se divertiu, mas cansou no final. Conseguiu fazer a pinça com ajuda."
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    className="w-full p-4 rounded-2xl border border-stone-200 bg-stone-50 text-slate-800 focus:ring-2 focus:ring-green-200 outline-none text-sm min-h-[100px]"
+                  ></textarea>
+               </div>
+
                <div className="grid grid-cols-3 gap-3">
-                 <button onClick={() => onComplete('easy')} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-green-50 hover:border-green-300 transition-colors flex flex-col items-center gap-2">
+                 <button onClick={() => onComplete('easy', note)} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-green-50 hover:border-green-300 transition-colors flex flex-col items-center gap-2">
                     <span className="text-2xl">😄</span>
                     <span className="text-xs font-bold text-slate-600">Fácil</span>
                  </button>
-                 <button onClick={() => onComplete('medium')} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-amber-50 hover:border-amber-300 transition-colors flex flex-col items-center gap-2">
+                 <button onClick={() => onComplete('medium', note)} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-amber-50 hover:border-amber-300 transition-colors flex flex-col items-center gap-2">
                     <span className="text-2xl">🙂</span>
                     <span className="text-xs font-bold text-slate-600">Médio</span>
                  </button>
-                 <button onClick={() => onComplete('hard')} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-rose-50 hover:border-rose-300 transition-colors flex flex-col items-center gap-2">
+                 <button onClick={() => onComplete('hard', note)} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:bg-rose-50 hover:border-rose-300 transition-colors flex flex-col items-center gap-2">
                     <span className="text-2xl">😓</span>
                     <span className="text-xs font-bold text-slate-600">Difícil</span>
                  </button>
@@ -1054,21 +1092,70 @@ const ProgressView = ({ history, childName }: { history: CompletedActivity[], ch
   const data = useMemo(() => {
     const cats: Record<string, number> = {};
     history.forEach(h => {
-      // In a real app, we'd join with activity DB to get category name. 
-      // Here we fake it based on ID prefix for demo visualization
       let label = 'Outro';
       if(h.activityId.startsWith('comm')) label = 'Comunicação';
       if(h.activityId.startsWith('sens')) label = 'Sensorial';
       if(h.activityId.startsWith('cog')) label = 'Cognitivo';
       if(h.activityId.startsWith('ot')) label = 'Motor';
       if(h.activityId.startsWith('feed')) label = 'Alimentar';
+      if(h.activityId.startsWith('soc')) label = 'Social';
       
       cats[label] = (cats[label] || 0) + 1;
     });
     return Object.keys(cats).map(key => ({ name: key, value: cats[key] }));
   }, [history]);
 
-  const COLORS = ['#16a34a', '#f43f5e', '#8b5cf6', '#f59e0b', '#3b82f6'];
+  // --- REPORT GENERATION LOGIC ---
+  const generateMonthlyReport = () => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentHistory = history.filter(h => new Date(h.date) >= thirtyDaysAgo);
+
+    if (recentHistory.length === 0) return null;
+
+    const catStats: Record<string, { easy: number, hard: number, total: number, notes: string[] }> = {};
+
+    recentHistory.forEach(h => {
+      let label = 'Geral';
+      if(h.activityId.startsWith('comm')) label = 'Comunicação';
+      if(h.activityId.startsWith('sens')) label = 'Sensorial';
+      if(h.activityId.startsWith('cog')) label = 'Cognitivo';
+      if(h.activityId.startsWith('ot')) label = 'Motor';
+      if(h.activityId.startsWith('feed')) label = 'Alimentar';
+      if(h.activityId.startsWith('soc')) label = 'Social';
+
+      if (!catStats[label]) catStats[label] = { easy: 0, hard: 0, total: 0, notes: [] };
+      
+      catStats[label].total++;
+      if (h.feedback === 'easy') catStats[label].easy++;
+      if (h.feedback === 'hard') catStats[label].hard++;
+      if (h.observation) catStats[label].notes.push(h.observation);
+    });
+
+    // Find Strengths and Struggles
+    let strength = { cat: '', score: -1 };
+    let struggle = { cat: '', score: -1 };
+
+    Object.keys(catStats).forEach(cat => {
+      const s = catStats[cat];
+      const easyRatio = s.easy / s.total;
+      const hardRatio = s.hard / s.total;
+
+      if (easyRatio > strength.score) strength = { cat, score: easyRatio };
+      if (hardRatio > struggle.score) struggle = { cat, score: hardRatio };
+    });
+
+    return {
+      totalMonth: recentHistory.length,
+      strength: strength.score > 0 ? strength.cat : 'Nenhuma específica',
+      struggle: struggle.score > 0 ? struggle.cat : 'Nenhuma específica',
+      observations: recentHistory.filter(h => h.observation).map(h => h.observation).slice(0, 3) // Last 3 notes
+    };
+  };
+
+  const report = generateMonthlyReport();
+  const COLORS = ['#16a34a', '#f43f5e', '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899'];
 
   return (
     <div className="p-6 pb-24">
@@ -1085,12 +1172,59 @@ const ProgressView = ({ history, childName }: { history: CompletedActivity[], ch
         </Card>
       </div>
 
-      <h3 className="font-bold text-slate-700 mb-4">Áreas Estimuladas</h3>
+      {/* MONTHLY REPORT SECTION */}
+      <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+        <ClipboardList className="w-5 h-5 text-green-600" />
+        Relatório Mensal (Últimos 30 dias)
+      </h3>
+      
+      {report ? (
+        <Card className="bg-white border-l-4 border-l-indigo-500 mb-8 shadow-md">
+          <div className="space-y-4">
+             <div className="flex items-start gap-3">
+               <TrendingUp className="w-5 h-5 text-green-600 mt-1" />
+               <div>
+                 <h4 className="font-bold text-slate-700 text-sm">Ponto Forte</h4>
+                 <p className="text-sm text-slate-600 leading-snug">
+                   O {childName} tem demonstrado facilidade em atividades de <strong>{report.strength}</strong>. Continue investindo nisso para aumentar a autoestima dele!
+                 </p>
+               </div>
+             </div>
+
+             <div className="flex items-start gap-3 pt-4 border-t border-stone-100">
+               <AlertCircle className="w-5 h-5 text-rose-500 mt-1" />
+               <div>
+                 <h4 className="font-bold text-slate-700 text-sm">Ponto de Atenção</h4>
+                 <p className="text-sm text-slate-600 leading-snug">
+                    Houve maior dificuldade na área de <strong>{report.struggle}</strong>. Tente atividades mais simples dessa categoria ou use mais suportes visuais.
+                 </p>
+               </div>
+             </div>
+
+             {report.observations.length > 0 && (
+               <div className="bg-stone-50 p-3 rounded-xl mt-2">
+                 <p className="text-xs text-slate-400 uppercase font-bold mb-2">Suas anotações recentes:</p>
+                 <ul className="space-y-2">
+                   {report.observations.map((obs, i) => (
+                     <li key={i} className="text-xs text-slate-600 italic">"{obs}"</li>
+                   ))}
+                 </ul>
+               </div>
+             )}
+          </div>
+        </Card>
+      ) : (
+        <div className="bg-stone-100 p-6 rounded-2xl text-center mb-8 border border-stone-200 border-dashed">
+           <p className="text-slate-400 text-sm">Complete mais atividades nos próximos dias para gerar seu primeiro relatório inteligente!</p>
+        </div>
+      )}
+
+      <h3 className="font-bold text-slate-700 mb-4">Gráfico de Estimulação</h3>
       <div className="h-64 w-full bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
-              <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} interval={0} />
               <YAxis hide />
               <Tooltip cursor={{fill: 'transparent'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
@@ -1112,12 +1246,13 @@ const ProgressView = ({ history, childName }: { history: CompletedActivity[], ch
          <div className="space-y-3">
             {history.slice(0, 3).map((h, i) => (
                <div key={i} className="flex items-center p-4 bg-white rounded-xl border border-stone-100 shadow-sm">
-                  <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mr-4">
+                  <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mr-4 flex-shrink-0">
                     <CheckCircle className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="font-bold text-slate-700 text-sm">Atividade Concluída</p>
                     <p className="text-xs text-slate-400">{new Date(h.date).toLocaleDateString()}</p>
+                    {h.observation && <p className="text-xs text-slate-500 mt-1 italic truncate max-w-[200px]">"{h.observation}"</p>}
                   </div>
                </div>
             ))}
@@ -1270,6 +1405,35 @@ export default function App() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
 
+  // State for Install Prompt
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+    setDeferredPrompt(null);
+  };
+
+
   // --- AUTH EFFECTS ---
 
   // Save DB whenever it changes
@@ -1415,13 +1579,14 @@ export default function App() {
     setView('detail');
   };
 
-  const handleCompleteActivity = (feedback: 'easy' | 'medium' | 'hard') => {
+  const handleCompleteActivity = (feedback: 'easy' | 'medium' | 'hard', note: string) => {
     if (!currentActivity || !currentUser) return;
     
     const newEntry: CompletedActivity = {
       activityId: currentActivity.id,
       date: new Date().toISOString(),
-      feedback
+      feedback,
+      observation: note // Salvar a nota
     };
 
     // Logic for immediate achievement notification
@@ -1446,11 +1611,45 @@ export default function App() {
     setView('dashboard');
   };
 
-  // Generate Routine
+  // --- NEW LOGIC: DAILY ROUTINE PERSISTENCE ---
+  // This ensures routine only updates once per day (midnight reset) 
+  // and respects history to avoid repetition.
   const dailyRoutine = useMemo(() => {
     if (!currentUser?.child) return [];
-    return generateDailyRoutine(currentUser.child);
-  }, [currentUser?.child]);
+
+    // 1. Check if we already have a generated routine for TODAY
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+    
+    if (currentUser.dailyRoutine && currentUser.dailyRoutine.date === todayStr) {
+       return currentUser.dailyRoutine.activities;
+    }
+
+    return []; // Temporary empty return, effect will trigger generation
+  }, [currentUser]); // Simple dependency
+
+  // Effect to generate routine if missing for today
+  useEffect(() => {
+    if (!currentUser?.child) return;
+
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+    
+    // If no routine or old date, generate new
+    if (!currentUser.dailyRoutine || currentUser.dailyRoutine.date !== todayStr) {
+       const newActivities = generateDailyRoutine(currentUser.child, currentUser.history);
+       
+       // Update State (which updates DB via existing effect)
+       setCurrentUser(prev => {
+         if (!prev) return null;
+         return {
+           ...prev,
+           dailyRoutine: {
+             date: todayStr,
+             activities: newActivities
+           }
+         };
+       });
+    }
+  }, [currentUser?.child, currentUser?.history, currentUser?.dailyRoutine?.date]);
 
 
   // --- RENDER ---
@@ -1513,6 +1712,8 @@ export default function App() {
             notifications={currentUser.notifications}
             onOpenNotifications={() => setShowNotifications(true)}
             onOpenCalendar={() => setView('calendar')}
+            installPrompt={deferredPrompt}
+            onInstallClick={handleInstallClick}
           />
         )}
         {view === 'progress' && currentUser.child && (
